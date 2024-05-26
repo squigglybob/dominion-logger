@@ -63,7 +63,7 @@ export class DominionLogger extends OpenElement {
     const playedKingdom = {
       name: this.name,
       cards: this.cards,
-      timestame: Date.now(),
+      timestamp: Date.now(),
       players: [],
     }
 
