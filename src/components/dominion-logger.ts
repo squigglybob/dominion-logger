@@ -4,21 +4,85 @@ import { OpenElement } from "../open-element";
 
 @customElement("dominion-logger")
 export class DominionLogger extends OpenElement {
-  @property()
+  @property({ attribute: false })
   name: string;
 
-  @property()
+  @property({ attribute: false })
   cards: string;
+
+  @property({ attribute: false })
+  kingdoms: Array<any>;
 
   constructor() {
     super()
 
     this.name = ''
     this.cards = ''
+    this.kingdoms = []
+  }
+
+  connectedCallback(): void {
+      super.connectedCallback()
+
+      this.loadLogs()
+  }
+
+  private loadLogs() {
+    const playedKingdomsJSON = localStorage.getItem('kingdomLogs')
+    let playedKingdoms : object
+
+    if (!playedKingdomsJSON) {
+      playedKingdoms = this.initialiseLog()
+    } else {
+      try {
+        playedKingdoms = JSON.parse(playedKingdomsJSON)
+      } catch (error : any) {
+        console.log('Something went wrong parsing the saved JSON', error.message)
+        return
+      }
+    }
+
+    this.kingdoms = playedKingdoms.logs
+
+  }
+
+  saveLogs() {
+    const data = {
+      version: 1,
+      logs: this.kingdoms,
+    }
+    localStorage.setItem('kingdomLogs', JSON.stringify(data))
   }
 
   private logKingdom() {
+    if (!this.name || !this.cards) {
+      return
+    }
+
     console.log(this.name, this.cards)
+    const playedKingdom = {
+      name: this.name,
+      cards: this.cards,
+      timestame: Date.now(),
+      players: [],
+    }
+
+    this.kingdoms.push(playedKingdom)
+
+    this.saveLogs()
+    this.clearForm()
+  }
+
+  private clearForm() {
+    this.name = ''
+    this.cards = ''
+  }
+
+  initialiseLog(): object {
+    return {
+      version: 1,
+      logs: [],
+    }
   }
 
   onChange(event : any): void {
@@ -44,14 +108,14 @@ export class DominionLogger extends OpenElement {
             name="name"
             placeholder="Name"
             @input=${this.onChange}
-            value=${this.name}
+            .value=${this.name}
           />
           <textarea
             rows="3"
             name="cards"
             placeholder="Kingdom cards used"
             @input=${this.onChange}
-            value=${this.cards}
+            .value=${this.cards}
           ></textarea>
           <button class="button" @click=${this.logKingdom}>
             Log Kingdom
