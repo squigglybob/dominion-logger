@@ -23,7 +23,7 @@ export class LogList extends OpenElement {
 
   private loadLogs() {
     const playedKingdomsJSON = localStorage.getItem('kingdomLogs')
-    let playedKingdoms : object
+    let playedKingdoms : LogData
 
     if (!playedKingdomsJSON) {
       playedKingdoms = this.initialiseLog()
@@ -36,18 +36,27 @@ export class LogList extends OpenElement {
       }
     }
 
-    console.log(playedKingdoms)
-    this.kingdoms = playedKingdoms.logs
+    this.kingdoms = playedKingdoms.logs.sort(this.reverseSort)
   }
 
-  initialiseLog(): object {
+  initialiseLog(): LogData {
     return {
       version: 1,
       logs: [],
     }
   }
 
-  private renderKingdom({ name, cards, timestamp }) {
+  private reverseSort(a : Kingdom,b : Kingdom) {
+    if (a.timestamp < b.timestamp) {
+      return 1
+    }
+    if (a.timestamp > b.timestamp) {
+      return -1
+    }
+    return 0
+  }
+
+  private renderKingdom({ name, cards, timestamp } : Kingdom) {
     return html`
         <div class="kingdom" role="listitem">
             <h2 class="kingdom__name">${name}</h2>

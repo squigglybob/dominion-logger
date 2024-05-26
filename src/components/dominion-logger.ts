@@ -29,7 +29,7 @@ export class DominionLogger extends OpenElement {
 
   private loadLogs() {
     const playedKingdomsJSON = localStorage.getItem('kingdomLogs')
-    let playedKingdoms : object
+    let playedKingdoms : LogData
 
     if (!playedKingdomsJSON) {
       playedKingdoms = this.initialiseLog()
@@ -59,7 +59,6 @@ export class DominionLogger extends OpenElement {
       return
     }
 
-    console.log(this.name, this.cards)
     const playedKingdom = {
       name: this.name,
       cards: this.cards,
@@ -78,7 +77,7 @@ export class DominionLogger extends OpenElement {
     this.cards = ''
   }
 
-  initialiseLog(): object {
+  initialiseLog(): LogData {
     return {
       version: 1,
       logs: [],
