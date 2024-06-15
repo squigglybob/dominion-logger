@@ -26,7 +26,6 @@ export class LogList extends OpenElement {
   }
 
   render() {
-    console.log('listing', this.kingdoms)
     return html`
         <div class="kingdom-logs" role="list">
             ${

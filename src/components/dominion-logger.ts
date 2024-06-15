@@ -5,19 +5,11 @@ import { OpenElement } from "../open-element";
 @customElement("dominion-logger")
 export class DominionLogger extends OpenElement {
   @property({ attribute: false })
-  name: string;
-
-  @property({ attribute: false })
-  cards: string;
-
-  @property({ attribute: false })
   kingdoms: Array<any>;
 
   constructor() {
     super()
 
-    this.name = ''
-    this.cards = ''
     this.kingdoms = []
   }
 
@@ -63,14 +55,15 @@ export class DominionLogger extends OpenElement {
     localStorage.setItem('kingdomLogs', JSON.stringify(data))
   }
 
-  private logKingdom() {
-    if (!this.name || !this.cards) {
+  private logKingdom(event : CustomEvent) {
+    const { name, cards } = event.detail
+    if (!name || !cards) {
       return
     }
 
     const playedKingdom = {
-      name: this.name,
-      cards: this.cards,
+      name: name,
+      cards: cards,
       timestamp: Date.now(),
       players: [],
     }
@@ -80,15 +73,7 @@ export class DominionLogger extends OpenElement {
       ...this.kingdoms,
     ]
 
-    console.log(this.kingdoms)
-
     this.saveLogs()
-    this.clearForm()
-  }
-
-  private clearForm() {
-    this.name = ''
-    this.cards = ''
   }
 
   initialiseLog(): LogData {
@@ -98,42 +83,13 @@ export class DominionLogger extends OpenElement {
     }
   }
 
-  onChange(event : any): void {
-    switch (event.target.name) {
-      case 'name':
-        this.name = event.target.value
-        break;
-      case 'cards':
-        this.cards = event.target.value
-        break;
-      default:
-        break;
-    }
-  }
-
   render() {
     return html`
       <div class="stack">
         <h1>Dominion Logger</h1>
-        <div class="stack logger">
-          <input
-            type="text"
-            name="name"
-            placeholder="Name"
-            @input=${this.onChange}
-            .value=${this.name}
-          />
-          <textarea
-            rows="3"
-            name="cards"
-            placeholder="Kingdom cards used"
-            @input=${this.onChange}
-            .value=${this.cards}
-          ></textarea>
-          <button class="button" @click=${this.logKingdom}>
-            Log Kingdom
-          </button>
-        </div>
+        <log-form
+          @log-kingdom=${this.logKingdom}
+        ></log-form>
         <log-list
           .kingdoms=${this.kingdoms}
         ></log-list>
