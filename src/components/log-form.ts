@@ -1,68 +1,95 @@
-import { html } from 'lit';
-import { customElement, property } from 'lit/decorators.js'
-import { OpenElement } from '../open-element';
+import { html } from "lit"
+import { customElement, property } from "lit/decorators.js"
+import { OpenElement } from "../open-element"
 
-@customElement('log-form')
+@customElement("log-form")
 export class LogForm extends OpenElement {
-  @property({ attribute: false })
-  name: string;
+  @property({ type: Boolean })
+  editMode: Boolean
 
-  @property({ attribute: false })
-  cards: string;
+  @property({ type: String })
+  name: string
 
-    constructor() {
-        console.log('construct form')
-        super()
+  @property({ type: String })
+  cards: string
 
-        this.name = ''
-        this.cards = ''
-    }
+  @property({ type: Number })
+  timestamp: Number
 
-    private clearForm() {
-        this.name = ''
-        this.cards = ''
-    }
+  constructor() {
+    super()
 
-  onChange(event : any): void {
+    this.name = ""
+    this.cards = ""
+    this.timestamp = 0
+    this.editMode = false
+  }
+
+  private clearForm() {
+    this.name = ""
+    this.cards = ""
+  }
+
+  onChange(event: any): void {
     switch (event.target.name) {
-      case 'name':
+      case "name":
         this.name = event.target.value
-        break;
-      case 'cards':
+        break
+      case "cards":
         this.cards = event.target.value
-        break;
+        break
       default:
-        break;
+        break
     }
   }
 
   logKingdom() {
-    this.dispatchEvent(new CustomEvent( 'log-kingdom', { detail: { name: this.name, cards: this.cards } } ))
+    this.dispatchEvent(
+      new CustomEvent("save", {
+        detail: {
+          name: this.name,
+          cards: this.cards,
+          timestamp: this.timestamp,
+        },
+      }),
+    )
+    this.clearForm()
+  }
+  cancel() {
+    this.dispatchEvent(new CustomEvent("cancel"))
     this.clearForm()
   }
 
-    render() {
-        console.log('render form')
-        return html`
-            <div class="stack logger">
-              <input
-                type="text"
-                name="name"
-                placeholder="Name"
-                @input=${this.onChange}
-                .value=${this.name}
-              />
-              <textarea
-                rows="3"
-                name="cards"
-                placeholder="Kingdom cards used"
-                @input=${this.onChange}
-                .value=${this.cards}
-              ></textarea>
-              <button class="button" @click=${this.logKingdom}>
-                Log Kingdom
-              </button>
-            </div>
-        `;
-    }
+  render() {
+    return html`
+      <div class="stack logger">
+        <input
+          type="text"
+          name="name"
+          placeholder="Name"
+          @input=${this.onChange}
+          .value=${this.name}
+        />
+        <textarea
+          rows="3"
+          name="cards"
+          placeholder="Kingdom cards used"
+          @input=${this.onChange}
+          .value=${this.cards}
+        ></textarea>
+        <div class="cluster">
+          <button class="button" @click=${this.logKingdom}>
+            ${this.editMode ? "Save" : "+1 Log"}
+          </button>
+          ${this.editMode
+            ? html`
+                <button class="button secondary" @click=${this.cancel}>
+                  Cancel
+                </button>
+              `
+            : ""}
+        </div>
+      </div>
+    `
+  }
 }
