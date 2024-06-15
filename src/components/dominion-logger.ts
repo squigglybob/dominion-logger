@@ -1,11 +1,11 @@
-import { html } from "lit";
-import { customElement, property } from "lit/decorators.js";
-import { OpenElement } from "../open-element";
+import { html } from "lit"
+import { customElement, property } from "lit/decorators.js"
+import { OpenElement } from "../open-element"
 
 @customElement("dominion-logger")
 export class DominionLogger extends OpenElement {
   @property({ attribute: false })
-  kingdoms: Array<any>;
+  kingdoms: Array<any>
 
   constructor() {
     super()
@@ -14,22 +14,25 @@ export class DominionLogger extends OpenElement {
   }
 
   connectedCallback(): void {
-      super.connectedCallback()
+    super.connectedCallback()
 
-      this.loadLogs()
+    this.loadLogs()
   }
 
   private loadLogs() {
-    const playedKingdomsJSON = localStorage.getItem('kingdomLogs')
-    let playedKingdoms : LogData
+    const playedKingdomsJSON = localStorage.getItem("kingdomLogs")
+    let playedKingdoms: LogData
 
     if (!playedKingdomsJSON) {
       playedKingdoms = this.initialiseLog()
     } else {
       try {
         playedKingdoms = JSON.parse(playedKingdomsJSON)
-      } catch (error : any) {
-        console.log('Something went wrong parsing the saved JSON', error.message)
+      } catch (error: any) {
+        console.log(
+          "Something went wrong parsing the saved JSON",
+          error.message,
+        )
         return
       }
     }
@@ -37,7 +40,7 @@ export class DominionLogger extends OpenElement {
     this.kingdoms = playedKingdoms.logs.sort(this.reverseSort)
   }
 
-  private reverseSort(a : Kingdom,b : Kingdom) {
+  private reverseSort(a: Kingdom, b: Kingdom) {
     if (a.timestamp < b.timestamp) {
       return 1
     }
@@ -52,10 +55,10 @@ export class DominionLogger extends OpenElement {
       version: 1,
       logs: this.kingdoms,
     }
-    localStorage.setItem('kingdomLogs', JSON.stringify(data))
+    localStorage.setItem("kingdomLogs", JSON.stringify(data))
   }
 
-  private logKingdom(event : CustomEvent) {
+  private logKingdom(event: CustomEvent) {
     const { name, cards } = event.detail
     if (!name || !cards) {
       return
@@ -68,12 +71,48 @@ export class DominionLogger extends OpenElement {
       players: [],
     }
 
-    this.kingdoms = [
-      playedKingdom,
-      ...this.kingdoms,
-    ]
+    this.kingdoms = [playedKingdom, ...this.kingdoms]
 
     this.saveLogs()
+  }
+
+  private editKingdom(event: CustomEvent) {
+    const { name, cards, timestamp } = event.detail
+    if (!name || !cards) {
+      return
+    }
+
+    const kingdom = this.kingdoms.find(
+      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
+    )
+    const kingdomPosition = this.kingdoms.findIndex(
+      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
+    )
+
+    kingdom.name = name
+    kingdom.cards = cards
+
+    /* splice edited kingdom back into place */
+    this.kingdoms = [
+      ...this.kingdoms.slice(0, kingdomPosition),
+      kingdom,
+      ...this.kingdoms.slice(kingdomPosition + 1),
+    ]
+  }
+  private deleteKingdom(event: CustomEvent) {
+    const { timestamp } = event.detail
+    if (!timestamp) {
+      return
+    }
+
+    const kingdomPosition = this.kingdoms.findIndex(
+      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
+    )
+
+    this.kingdoms = [
+      ...this.kingdoms.slice(0, kingdomPosition),
+      ...this.kingdoms.slice(kingdomPosition + 1),
+    ]
   }
 
   initialiseLog(): LogData {
@@ -87,19 +126,19 @@ export class DominionLogger extends OpenElement {
     return html`
       <div class="stack">
         <h1>Dominion Logger</h1>
-        <log-form
-          @log-kingdom=${this.logKingdom}
-        ></log-form>
+        <log-form @save=${this.logKingdom}></log-form>
         <log-list
           .kingdoms=${this.kingdoms}
+          @edit=${this.editKingdom}
+          @delete=${this.deleteKingdom}
         ></log-list>
       </div>
-    `;
+    `
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "dominion-logger": DominionLogger;
+    "dominion-logger": DominionLogger
   }
 }
