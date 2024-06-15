@@ -42,8 +42,17 @@ export class DominionLogger extends OpenElement {
       }
     }
 
-    this.kingdoms = playedKingdoms.logs
+    this.kingdoms = playedKingdoms.logs.sort(this.reverseSort)
+  }
 
+  private reverseSort(a : Kingdom,b : Kingdom) {
+    if (a.timestamp < b.timestamp) {
+      return 1
+    }
+    if (a.timestamp > b.timestamp) {
+      return -1
+    }
+    return 0
   }
 
   saveLogs() {
@@ -66,7 +75,12 @@ export class DominionLogger extends OpenElement {
       players: [],
     }
 
-    this.kingdoms.push(playedKingdom)
+    this.kingdoms = [
+      playedKingdom,
+      ...this.kingdoms,
+    ]
+
+    console.log(this.kingdoms)
 
     this.saveLogs()
     this.clearForm()
@@ -120,6 +134,9 @@ export class DominionLogger extends OpenElement {
             Log Kingdom
           </button>
         </div>
+        <log-list
+          .kingdoms=${this.kingdoms}
+        ></log-list>
       </div>
     `;
   }

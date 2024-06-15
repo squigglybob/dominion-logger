@@ -6,54 +6,13 @@ import { DateTime } from 'luxon'
 
 @customElement("log-list")
 export class LogList extends OpenElement {
-  @property({ attribute: false })
+  @property({ type: Array })
   kingdoms: Array<any>;
 
   constructor() {
     super()
 
     this.kingdoms = []
-  }
-
-  connectedCallback(): void {
-      super.connectedCallback()
-
-      this.loadLogs()
-  }
-
-  private loadLogs() {
-    const playedKingdomsJSON = localStorage.getItem('kingdomLogs')
-    let playedKingdoms : LogData
-
-    if (!playedKingdomsJSON) {
-      playedKingdoms = this.initialiseLog()
-    } else {
-      try {
-        playedKingdoms = JSON.parse(playedKingdomsJSON)
-      } catch (error : any) {
-        console.log('Something went wrong parsing the saved JSON', error.message)
-        return
-      }
-    }
-
-    this.kingdoms = playedKingdoms.logs.sort(this.reverseSort)
-  }
-
-  initialiseLog(): LogData {
-    return {
-      version: 1,
-      logs: [],
-    }
-  }
-
-  private reverseSort(a : Kingdom,b : Kingdom) {
-    if (a.timestamp < b.timestamp) {
-      return 1
-    }
-    if (a.timestamp > b.timestamp) {
-      return -1
-    }
-    return 0
   }
 
   private renderKingdom({ name, cards, timestamp } : Kingdom) {
@@ -67,6 +26,7 @@ export class LogList extends OpenElement {
   }
 
   render() {
+    console.log('listing', this.kingdoms)
     return html`
         <div class="kingdom-logs" role="list">
             ${
