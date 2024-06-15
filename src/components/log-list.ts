@@ -12,15 +12,28 @@ export class LogList extends OpenElement {
   @property({ type: Number, attribute: false })
   isEditing: Number
 
+  @property({ type: Number, attribute: false })
+  isDeleting: Number
+
   constructor() {
     super()
 
     this.kingdoms = []
     this.isEditing = 0
+    this.isDeleting = 0
 
     this.renderKingdom = this.renderKingdom.bind(this)
   }
 
+  deleteKingdom(id: Number) {
+    this.isDeleting = id
+  }
+  confirmDelete(id: Number) {
+    this.dispatchEvent(new CustomEvent("delete", { detail: { timestamp: id } }))
+  }
+  cancelDelete() {
+    this.isDeleting = 0
+  }
   editKingdom(id: Number) {
     this.isEditing = id
   }
@@ -53,12 +66,40 @@ export class LogList extends OpenElement {
               <p class="kingdom__time">
                 ${timestamp && DateTime.fromMillis(timestamp).toHTTP()}
               </p>
-              <button
-                class="button small"
-                @click=${() => this.editKingdom(timestamp)}
-              >
-                Edit
-              </button>
+              <div class="repel">
+                <button
+                  class="button small"
+                  @click=${() => this.editKingdom(timestamp)}
+                >
+                  Edit
+                </button>
+                <div class="cluster">
+                  ${this.isDeleting === timestamp
+                    ? html`
+                        <span>Are you sure?</span>
+                        <button
+                          class="button small"
+                          @click=${() => this.confirmDelete(timestamp)}
+                        >
+                          Yes
+                        </button>
+                        <button
+                          class="button small"
+                          @click=${() => this.cancelDelete()}
+                        >
+                          No
+                        </button>
+                      `
+                    : html`
+                        <button
+                          class="button small"
+                          @click=${() => this.deleteKingdom(timestamp)}
+                        >
+                          Delete
+                        </button>
+                      `}
+                </div>
+              </div>
             `}
       </div>
     `

@@ -88,7 +88,6 @@ export class DominionLogger extends OpenElement {
     const kingdomPosition = this.kingdoms.findIndex(
       (kingdom: Kingdom) => kingdom.timestamp === timestamp,
     )
-    console.log(kingdom, event.detail)
 
     kingdom.name = name
     kingdom.cards = cards
@@ -97,6 +96,21 @@ export class DominionLogger extends OpenElement {
     this.kingdoms = [
       ...this.kingdoms.slice(0, kingdomPosition),
       kingdom,
+      ...this.kingdoms.slice(kingdomPosition + 1),
+    ]
+  }
+  private deleteKingdom(event: CustomEvent) {
+    const { timestamp } = event.detail
+    if (!timestamp) {
+      return
+    }
+
+    const kingdomPosition = this.kingdoms.findIndex(
+      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
+    )
+
+    this.kingdoms = [
+      ...this.kingdoms.slice(0, kingdomPosition),
       ...this.kingdoms.slice(kingdomPosition + 1),
     ]
   }
@@ -116,6 +130,7 @@ export class DominionLogger extends OpenElement {
         <log-list
           .kingdoms=${this.kingdoms}
           @edit=${this.editKingdom}
+          @delete=${this.deleteKingdom}
         ></log-list>
       </div>
     `

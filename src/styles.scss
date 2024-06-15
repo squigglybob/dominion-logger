@@ -64,6 +64,10 @@ a {
   flex-wrap: wrap;
   gap: var(--gutter, 1rem);
 }
+.repel {
+  display: flex;
+  justify-content: space-between;
+}
 
 @media (prefers-color-scheme: light) {
   :root {
