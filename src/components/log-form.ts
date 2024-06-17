@@ -16,6 +16,12 @@ export class LogForm extends OpenElement {
   @property({ type: Number })
   timestamp: Number
 
+  @property({ type: Boolean, attribute: false })
+  hasNameError: Boolean
+
+  @property({ type: Boolean, attribute: false })
+  hasCardsError: Boolean
+
   constructor() {
     super()
 
@@ -23,6 +29,8 @@ export class LogForm extends OpenElement {
     this.cards = ""
     this.timestamp = 0
     this.editMode = false
+    this.hasNameError = false
+    this.hasCardsError = false
   }
 
   private clearForm() {
@@ -44,6 +52,12 @@ export class LogForm extends OpenElement {
   }
 
   logKingdom() {
+    this.hasNameError = !this.name || this.name === ""
+    this.hasCardsError = !this.cards || this.cards === ""
+
+    if (this.hasNameError || this.hasCardsError) {
+      return
+    }
     this.dispatchEvent(
       new CustomEvent("save", {
         detail: {
@@ -63,20 +77,30 @@ export class LogForm extends OpenElement {
   render() {
     return html`
       <div class="stack logger">
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          @input=${this.onChange}
-          .value=${this.name}
-        />
-        <textarea
-          rows="3"
-          name="cards"
-          placeholder="Kingdom cards used"
-          @input=${this.onChange}
-          .value=${this.cards}
-        ></textarea>
+        <div>
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            @input=${this.onChange}
+            .value=${this.name}
+          />
+          ${this.hasNameError
+            ? html`<span class="error-text">Name can't be empty</span>`
+            : ""}
+        </div>
+        <div>
+          <textarea
+            rows="3"
+            name="cards"
+            placeholder="Kingdom cards used"
+            @input=${this.onChange}
+            .value=${this.cards}
+          ></textarea>
+          ${this.hasCardsError
+            ? html`<span class="error-text">Cards can't be empty</span>`
+            : ""}
+        </div>
         <div class="cluster">
           <button class="button" @click=${this.logKingdom}>
             ${this.editMode ? "Save" : "+1 Log"}

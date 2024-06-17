@@ -22,6 +22,10 @@ body {
   min-height: 100vh;
 }
 
+input, textarea {
+  width: 100%;
+}
+
 button {
   width: fit-content;
   padding: 0.5rem 1rem;
@@ -67,6 +71,11 @@ a {
 .repel {
   display: flex;
   justify-content: space-between;
+}
+
+.error-text {
+  color: red;
+  font-size: 0.9em;
 }
 
 @media (prefers-color-scheme: light) {
