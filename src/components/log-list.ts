@@ -15,12 +15,16 @@ export class LogList extends OpenElement {
   @property({ type: Number, attribute: false })
   isDeleting: Number
 
+  @property({ type: Number, attribute: false })
+  openSettingsPanelId: Number
+
   constructor() {
     super()
 
     this.kingdoms = []
     this.isEditing = 0
     this.isDeleting = 0
+    this.openSettingsPanelId = 0
 
     this.renderKingdom = this.renderKingdom.bind(this)
   }
@@ -38,7 +42,6 @@ export class LogList extends OpenElement {
     this.isEditing = id
   }
   saveKingdom(event: CustomEvent) {
-    console.log(event.detail)
     this.dispatchEvent(new CustomEvent("edit", { detail: event.detail }))
     this.isEditing = 0
   }
@@ -46,7 +49,22 @@ export class LogList extends OpenElement {
     this.isEditing = 0
   }
 
-  private renderKingdom({ name, cards, timestamp }: Kingdom) {
+  openSettings(timestamp: number) {
+    this.openSettingsPanelId = timestamp
+  }
+  closeSettings() {
+    this.openSettingsPanelId = 0
+  }
+
+  likeKingdom(timestamp : number) {
+    this.dispatchEvent(new CustomEvent("like", { detail: { timestamp, likes: 1 } }))
+  }
+
+  unLikeKingdom(timestamp : number) {
+    this.dispatchEvent(new CustomEvent("like", { detail: { timestamp, likes: -1 } }))
+  }
+
+  private renderKingdom({ name, cards, timestamp, likes }: Kingdom) {
     return html`
       <div class="kingdom" role="listitem">
         ${this.isEditing === timestamp
@@ -66,47 +84,91 @@ export class LogList extends OpenElement {
               <p class="kingdom__time">
                 ${timestamp && DateTime.fromMillis(timestamp).toHTTP()}
               </p>
-              <div class="repel">
-                <button
-                  class="button small"
-                  @click=${() => this.editKingdom(timestamp)}
-                >
-                  Edit
-                </button>
-                <div class="cluster">
-                  ${this.isDeleting === timestamp
-                    ? html`
-                        <span>Are you sure?</span>
+                ${
+                  typeof likes !== 'undefined' ? html`
+                    <p class="kingdom__likes">
+                      ${likes > -1 ? '+' : '-'}${likes} Like${Math.abs(likes) > 1 ? 's' : ''}
+                    </p>
+                  ` : ''
+                }
+              <div class="kingdom__footer">
+                ${
+                  this.openSettingsPanelId === timestamp ? html`
+                    <div class="kingdom__settings repel">
+                      <div class="cluster">
                         <button
                           class="button small"
-                          @click=${() => this.confirmDelete(timestamp)}
+                          @click=${() => this.closeSettings()}
                         >
-                          Yes
+                          Close
                         </button>
                         <button
                           class="button small"
-                          @click=${() => this.cancelDelete()}
+                          @click=${() => this.editKingdom(timestamp)}
                         >
-                          No
+                          Edit
                         </button>
-                      `
-                    : html`
-                        <button
-                          class="button small"
-                          @click=${() => this.deleteKingdom(timestamp)}
-                        >
-                          Delete
-                        </button>
-                      `}
-                </div>
+                      </div>
+                      <div class="cluster">
+                        ${this.isDeleting === timestamp
+                          ? html`
+                              <span>Are you sure?</span>
+                              <button
+                                class="button small"
+                                @click=${() => this.confirmDelete(timestamp)}
+                              >
+                                Yes
+                              </button>
+                              <button
+                                class="button small"
+                                @click=${() => this.cancelDelete()}
+                              >
+                                No
+                              </button>
+                            `
+                          : html`
+                              <button
+                                class="button small"
+                                @click=${() => this.deleteKingdom(timestamp)}
+                              >
+                                Delete
+                              </button>
+
+                            `}
+
+                      </div>
+                    </div>
+                  ` : html`
+                    <div class="cluster">
+                      <button
+                        class="button small"
+                        @click=${() => this.openSettings(timestamp)}
+                      >
+                        Settings
+                      </button>
+                      <button
+                        class="button small"
+                        @click=${() => this.likeKingdom(timestamp)}
+                      >
+                        +1 Like
+                      </button>
+                      <button
+                        class="button small"
+                        @click=${() => this.unLikeKingdom(timestamp)}
+                      >
+                        -1 Like
+                      </button>
+                    </div>
+                  `
+                }
               </div>
+
             `}
       </div>
     `
   }
 
   render() {
-    console.log(this.kingdoms)
     return html`
       <div class="kingdom-logs" role="list">
         ${repeat(

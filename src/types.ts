@@ -7,4 +7,5 @@ interface Kingdom {
   name: string
   cards: string
   timestamp: number
+  likes: number
 }
