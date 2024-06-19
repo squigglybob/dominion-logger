@@ -69,9 +69,32 @@ export class DominionLogger extends OpenElement {
       cards: cards,
       timestamp: Date.now(),
       players: [],
+      likes: 0,
     }
 
     this.kingdoms = [playedKingdom, ...this.kingdoms]
+
+    this.saveLogs()
+  }
+
+  private getKingdom(timestamp: number) : Kingdom {
+    const kingdom = this.kingdoms.find(
+      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
+    )
+
+    return kingdom
+  }
+  private updateKingdom(kingdom: Kingdom) {
+    const { timestamp } = kingdom
+    const kingdomPosition = this.kingdoms.findIndex(
+      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
+    )
+    /* splice edited kingdom back into place */
+    this.kingdoms = [
+      ...this.kingdoms.slice(0, kingdomPosition),
+      kingdom,
+      ...this.kingdoms.slice(kingdomPosition + 1),
+    ]
 
     this.saveLogs()
   }
@@ -82,22 +105,12 @@ export class DominionLogger extends OpenElement {
       return
     }
 
-    const kingdom = this.kingdoms.find(
-      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
-    )
-    const kingdomPosition = this.kingdoms.findIndex(
-      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
-    )
+    const kingdom = this.getKingdom(timestamp)
 
     kingdom.name = name
     kingdom.cards = cards
 
-    /* splice edited kingdom back into place */
-    this.kingdoms = [
-      ...this.kingdoms.slice(0, kingdomPosition),
-      kingdom,
-      ...this.kingdoms.slice(kingdomPosition + 1),
-    ]
+    this.updateKingdom(kingdom)
   }
   private deleteKingdom(event: CustomEvent) {
     const { timestamp } = event.detail
@@ -113,6 +126,20 @@ export class DominionLogger extends OpenElement {
       ...this.kingdoms.slice(0, kingdomPosition),
       ...this.kingdoms.slice(kingdomPosition + 1),
     ]
+
+    this.saveLogs()
+  }
+  likeKingdom(event: CustomEvent) {
+    const { timestamp, likes } = event.detail
+
+    const kingdom = this.getKingdom(timestamp)
+
+    if (typeof kingdom.likes === 'undefined') {
+      kingdom.likes = 1
+    }
+    kingdom.likes = kingdom.likes + likes
+
+    this.updateKingdom(kingdom)
   }
 
   initialiseLog(): LogData {
@@ -131,6 +158,8 @@ export class DominionLogger extends OpenElement {
           .kingdoms=${this.kingdoms}
           @edit=${this.editKingdom}
           @delete=${this.deleteKingdom}
+          @like=${this.likeKingdom}
+          @unlike=${this.unLikeKingdom}
         ></log-list>
       </div>
     `
