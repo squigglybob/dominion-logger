@@ -65,7 +65,11 @@ export class LogList extends OpenElement {
     this.dispatchEvent(new CustomEvent("like", { detail: { id, likes: -1 } }))
   }
 
-  private renderKingdom({ name, cards, note, timestamp, id, likes }: Kingdom) {
+  bookmarkKingdom(id : string) {
+    this.dispatchEvent(new CustomEvent("bookmark", { detail: { id, likes: -1 } }))
+  }
+
+  private renderKingdom({ name, cards, note, timestamp, isBookmarked, id, likes }: Kingdom) {
     return html`
       <div class="kingdom" role="listitem">
         ${this.isEditing === id
@@ -161,6 +165,12 @@ export class LogList extends OpenElement {
                           @click=${() => this.unLikeKingdom(id)}
                         >
                           -1 Like
+                        </button>
+                        <button
+                          class="button small ${isBookmarked ? 'active' : ''}"
+                          @click=${() => this.bookmarkKingdom(id)}
+                        >
+                          Bookmark
                         </button>
                       </div>
                       <button

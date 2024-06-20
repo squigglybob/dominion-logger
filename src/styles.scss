@@ -59,6 +59,10 @@ hr {
   &.small {
     padding: 0.2rem 0.5rem;
   }
+
+  &.active {
+    background-color: green;
+  }
 }
 
 .stack {
@@ -72,7 +76,7 @@ hr {
 .cluster {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gutter, 1rem);
+  gap: var(--gutter, 0.4rem);
 }
 .repel {
   display: flex;

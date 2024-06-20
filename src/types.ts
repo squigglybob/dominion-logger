@@ -11,6 +11,8 @@ interface Kingdom {
   dateCreated: number
   note: string
   likes: number
+  isBookmarked: boolean
+  parentId: string
   players: Array<Play>
 }
 

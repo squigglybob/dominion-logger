@@ -59,6 +59,13 @@ export class DominionLogger extends OpenElement {
         note: '',
       })
     })
+    this.migrateData(4, logData, (kingdomLog: Kingdom) => {
+      return ({
+        ...kingdomLog,
+        isBookmarked: false,
+        parentId: ''
+      })
+    })
 
     this.kingdoms = logData.logs.sort(this.reverseSort)
   }
@@ -106,6 +113,8 @@ export class DominionLogger extends OpenElement {
       dateCreated: Date.now(),
       players: [],
       likes: 0,
+      isBookmarked: false,
+      parentId: '',
       note,
     }
 
@@ -179,6 +188,15 @@ export class DominionLogger extends OpenElement {
 
     this.updateKingdom(kingdom)
   }
+  bookmarkKingdom(event: CustomEvent) {
+    const { id } = event.detail
+
+    const kingdom = this.getKingdom(id)
+
+    kingdom.isBookmarked = !kingdom.isBookmarked
+
+    this.updateKingdom(kingdom)
+  }
 
   initialiseLog(): LogData {
     return {
@@ -197,6 +215,7 @@ export class DominionLogger extends OpenElement {
           @edit=${this.editKingdom}
           @delete=${this.deleteKingdom}
           @like=${this.likeKingdom}
+          @bookmark=${this.bookmarkKingdom}
         ></log-list>
       </div>
     `
