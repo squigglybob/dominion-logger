@@ -8,10 +8,14 @@ export class DominionLogger extends OpenElement {
   @property({ attribute: false })
   kingdoms: Array<any>
 
+  @property({ type: Number, attribute: false })
+  logVersion: Number
+
   constructor() {
     super()
 
     this.kingdoms = []
+    this.logVersion = 1
   }
 
   connectedCallback(): void {
@@ -37,6 +41,8 @@ export class DominionLogger extends OpenElement {
         return
       }
     }
+
+    this.logVersion = logData.version
 
     /* Migrations */
     this.migrateData(2, logData, (kingdomLog: Kingdom) => {
@@ -72,7 +78,7 @@ export class DominionLogger extends OpenElement {
 
   saveLogs() {
     const data = {
-      version: 1,
+      version: this.logVersion,
       logs: [ ...this.kingdoms ],
     }
     localStorage.setItem("kingdomLogs", JSON.stringify(data))
