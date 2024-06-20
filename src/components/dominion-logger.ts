@@ -65,6 +65,7 @@ export class DominionLogger extends OpenElement {
   migrateData(version: number, logData: LogData, callback: (log: Kingdom) => Kingdom) {
     if (logData.version === version - 1) {
       logData.version = version
+      this.logVersion = version
 
       logData.logs = logData.logs.map(callback)
 
