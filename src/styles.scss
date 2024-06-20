@@ -36,6 +36,11 @@ a {
   text-decoration: inherit;
 }
 
+hr {
+  width: 30%;
+  min-width: 200px;
+}
+
 .container {
   max-width: 960px;
   margin-inline: auto;
@@ -79,6 +84,23 @@ a {
 .error-text {
   color: red;
   font-size: 0.9em;
+}
+
+/* Blocks */
+.kingdom__name {
+  text-align: center;
+}
+.kingdom__cards {
+  text-align: center;
+}
+.kingdom__note {
+  text-align: center;
+}
+.kingdom__time {
+  text-align: right;
+}
+.kingdom__likes {
+  text-align: center;
 }
 
 @media (prefers-color-scheme: light) {

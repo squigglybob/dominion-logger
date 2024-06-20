@@ -13,6 +13,9 @@ export class LogForm extends OpenElement {
   @property({ type: String })
   cards: string
 
+  @property({ type: String })
+  note: string
+
   @property({ type: Number })
   timestamp: Number
 
@@ -30,6 +33,7 @@ export class LogForm extends OpenElement {
 
     this.name = ""
     this.cards = ""
+    this.note = ""
     this.timestamp = 0
     this.id = ""
     this.editMode = false
@@ -40,6 +44,7 @@ export class LogForm extends OpenElement {
   private clearForm() {
     this.name = ""
     this.cards = ""
+    this.note = ""
   }
 
   onChange(event: any): void {
@@ -49,6 +54,9 @@ export class LogForm extends OpenElement {
         break
       case "cards":
         this.cards = event.target.value
+        break
+      case "note":
+        this.note = event.target.value
         break
       default:
         break
@@ -67,6 +75,7 @@ export class LogForm extends OpenElement {
         detail: {
           name: this.name,
           cards: this.cards,
+          note: this.note,
           timestamp: this.timestamp,
           id: this.id,
         },
@@ -105,6 +114,15 @@ export class LogForm extends OpenElement {
           ${this.hasCardsError
             ? html`<span class="error-text">Cards can't be empty</span>`
             : ""}
+        </div>
+        <div>
+          <textarea
+            rows="2"
+            name="note"
+            placeholder="Kingdom notes"
+            @input=${this.onChange}
+            .value=${this.note}
+          ></textarea>
         </div>
         <div class="cluster">
           <button class="button" @click=${this.logKingdom}>

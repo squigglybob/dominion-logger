@@ -65,7 +65,7 @@ export class LogList extends OpenElement {
     this.dispatchEvent(new CustomEvent("like", { detail: { id, likes: -1 } }))
   }
 
-  private renderKingdom({ name, cards, timestamp, id, likes }: Kingdom) {
+  private renderKingdom({ name, cards, note, timestamp, id, likes }: Kingdom) {
     return html`
       <div class="kingdom" role="listitem">
         ${this.isEditing === id
@@ -74,6 +74,7 @@ export class LogList extends OpenElement {
                 editMode
                 name=${name}
                 cards=${cards}
+                note=${note}
                 timestamp=${timestamp}
                 id=${id}
                 @save=${this.saveKingdom}
@@ -83,16 +84,22 @@ export class LogList extends OpenElement {
           : html`
               <h2 class="kingdom__name">${name}</h2>
               <p class="kingdom__cards">${cards}</p>
+              ${
+                note ? html`
+                  <hr>
+                  <p class="kingdom__note">${note}</p>
+                ` : ''
+              }
+              ${
+                typeof likes !== 'undefined' ? html`
+                  <p class="kingdom__likes">
+                    ${likes > -1 ? '+' : ''}${likes} Like${Math.abs(likes) > 1 ? 's' : ''}
+                  </p>
+                ` : ''
+              }
               <p class="kingdom__time">
                 ${timestamp && DateTime.fromMillis(timestamp).toHTTP()}
               </p>
-                ${
-                  typeof likes !== 'undefined' ? html`
-                    <p class="kingdom__likes">
-                      ${likes > -1 ? '+' : ''}${likes} Like${Math.abs(likes) > 1 ? 's' : ''}
-                    </p>
-                  ` : ''
-                }
               <div class="kingdom__footer">
                 ${
                   this.openSettingsPanelId === id ? html`

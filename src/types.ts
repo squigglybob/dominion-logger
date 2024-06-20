@@ -9,6 +9,7 @@ interface Kingdom {
   cards: string
   timestamp: number
   dateCreated: number
+  note: string
   likes: number
   players: Array<Play>
 }

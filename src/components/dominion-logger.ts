@@ -53,6 +53,12 @@ export class DominionLogger extends OpenElement {
         likes: 0,
       })
     })
+    this.migrateData(3, logData, (kingdomLog: Kingdom) => {
+      return ({
+        ...kingdomLog,
+        note: '',
+      })
+    })
 
     this.kingdoms = logData.logs.sort(this.reverseSort)
   }
@@ -85,7 +91,8 @@ export class DominionLogger extends OpenElement {
   }
 
   private logKingdom(event: CustomEvent) {
-    const { name, cards } = event.detail
+    console.log(event.detail)
+    const { name, cards, note } = event.detail
     if (!name || !cards) {
       return
     }
@@ -98,6 +105,7 @@ export class DominionLogger extends OpenElement {
       dateCreated: Date.now(),
       players: [],
       likes: 0,
+      note,
     }
 
     this.kingdoms = [playedKingdom, ...this.kingdoms]
@@ -128,7 +136,7 @@ export class DominionLogger extends OpenElement {
   }
 
   private editKingdom(event: CustomEvent) {
-    const { name, cards, id } = event.detail
+    const { name, cards, note, id } = event.detail
     if (!name || !cards) {
       return
     }
@@ -137,6 +145,7 @@ export class DominionLogger extends OpenElement {
 
     kingdom.name = name
     kingdom.cards = cards
+    kingdom.note = note
 
     this.updateKingdom(kingdom)
   }
