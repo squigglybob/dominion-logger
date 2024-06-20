@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/uuid": "^9.0.8",
     "gh-pages": "^6.1.1",
     "lit": "^3.1.2",
-    "luxon": "^3.4.4"
+    "luxon": "^3.4.4",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/luxon": "^3.4.2",

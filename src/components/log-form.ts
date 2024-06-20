@@ -16,6 +16,9 @@ export class LogForm extends OpenElement {
   @property({ type: Number })
   timestamp: Number
 
+  @property({ type: String })
+  id: string
+
   @property({ type: Boolean, attribute: false })
   hasNameError: Boolean
 
@@ -28,6 +31,7 @@ export class LogForm extends OpenElement {
     this.name = ""
     this.cards = ""
     this.timestamp = 0
+    this.id = ""
     this.editMode = false
     this.hasNameError = false
     this.hasCardsError = false
@@ -64,6 +68,7 @@ export class LogForm extends OpenElement {
           name: this.name,
           cards: this.cards,
           timestamp: this.timestamp,
+          id: this.id,
         },
       }),
     )

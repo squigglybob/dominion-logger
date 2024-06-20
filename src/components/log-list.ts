@@ -9,71 +9,73 @@ export class LogList extends OpenElement {
   @property({ type: Array })
   kingdoms: Array<any>
 
-  @property({ type: Number, attribute: false })
-  isEditing: Number
+  @property({ type: String, attribute: false })
+  isEditing: string
 
-  @property({ type: Number, attribute: false })
-  isDeleting: Number
+  @property({ type: String, attribute: false })
+  isDeleting: string
 
-  @property({ type: Number, attribute: false })
-  openSettingsPanelId: Number
+  @property({ type: String, attribute: false })
+  openSettingsPanelId: string
 
   constructor() {
     super()
 
     this.kingdoms = []
-    this.isEditing = 0
-    this.isDeleting = 0
-    this.openSettingsPanelId = 0
+    this.isEditing = ''
+    this.isDeleting = ''
+    this.openSettingsPanelId = ''
 
     this.renderKingdom = this.renderKingdom.bind(this)
   }
 
-  deleteKingdom(id: Number) {
+  deleteKingdom(id: string) {
     this.isDeleting = id
   }
-  confirmDelete(id: Number) {
-    this.dispatchEvent(new CustomEvent("delete", { detail: { timestamp: id } }))
+  confirmDelete(id: string) {
+    this.dispatchEvent(new CustomEvent("delete", { detail: { id } }))
   }
   cancelDelete() {
-    this.isDeleting = 0
+    this.isDeleting = ''
   }
-  editKingdom(id: Number) {
+  editKingdom(id: string) {
     this.isEditing = id
   }
   saveKingdom(event: CustomEvent) {
     this.dispatchEvent(new CustomEvent("edit", { detail: event.detail }))
-    this.isEditing = 0
+    this.isEditing = ''
+    this.closeSettings()
   }
   cancelEditing() {
-    this.isEditing = 0
+    this.isEditing = ''
   }
 
-  openSettings(timestamp: number) {
-    this.openSettingsPanelId = timestamp
+  openSettings(id: string) {
+    this.openSettingsPanelId = id
   }
   closeSettings() {
-    this.openSettingsPanelId = 0
+    this.openSettingsPanelId = ''
   }
 
-  likeKingdom(timestamp : number) {
-    this.dispatchEvent(new CustomEvent("like", { detail: { timestamp, likes: 1 } }))
+  likeKingdom(id : string) {
+    this.dispatchEvent(new CustomEvent("like", { detail: { id, likes: 1 } }))
   }
 
-  unLikeKingdom(timestamp : number) {
-    this.dispatchEvent(new CustomEvent("like", { detail: { timestamp, likes: -1 } }))
+  unLikeKingdom(id : string) {
+    this.dispatchEvent(new CustomEvent("like", { detail: { id, likes: -1 } }))
   }
 
-  private renderKingdom({ name, cards, timestamp, likes }: Kingdom) {
+  private renderKingdom({ name, cards, timestamp, id, likes }: Kingdom) {
     return html`
       <div class="kingdom" role="listitem">
-        ${this.isEditing === timestamp
+        ${this.isEditing === id
           ? html`
               <log-form
                 editMode
                 name=${name}
                 cards=${cards}
                 timestamp=${timestamp}
+                id=${id}
                 @save=${this.saveKingdom}
                 @cancel=${this.cancelEditing}
               ></log-form>
@@ -87,13 +89,13 @@ export class LogList extends OpenElement {
                 ${
                   typeof likes !== 'undefined' ? html`
                     <p class="kingdom__likes">
-                      ${likes > -1 ? '+' : '-'}${likes} Like${Math.abs(likes) > 1 ? 's' : ''}
+                      ${likes > -1 ? '+' : ''}${likes} Like${Math.abs(likes) > 1 ? 's' : ''}
                     </p>
                   ` : ''
                 }
               <div class="kingdom__footer">
                 ${
-                  this.openSettingsPanelId === timestamp ? html`
+                  this.openSettingsPanelId === id ? html`
                     <div class="kingdom__settings repel">
                       <div class="cluster">
                         <button
@@ -102,20 +104,15 @@ export class LogList extends OpenElement {
                         >
                           Close
                         </button>
-                        <button
-                          class="button small"
-                          @click=${() => this.editKingdom(timestamp)}
-                        >
-                          Edit
-                        </button>
+
                       </div>
                       <div class="cluster">
-                        ${this.isDeleting === timestamp
+                        ${this.isDeleting === id
                           ? html`
                               <span>Are you sure?</span>
                               <button
                                 class="button small"
-                                @click=${() => this.confirmDelete(timestamp)}
+                                @click=${() => this.confirmDelete(id)}
                               >
                                 Yes
                               </button>
@@ -129,34 +126,41 @@ export class LogList extends OpenElement {
                           : html`
                               <button
                                 class="button small"
-                                @click=${() => this.deleteKingdom(timestamp)}
+                                @click=${() => this.deleteKingdom(id)}
                               >
                                 Delete
                               </button>
 
                             `}
-
+                        <button
+                          class="button small"
+                          @click=${() => this.editKingdom(id)}
+                        >
+                          Edit
+                        </button>
                       </div>
                     </div>
                   ` : html`
-                    <div class="cluster">
+                    <div class="repel">
+                      <div class="cluster">
+                        <button
+                          class="button small"
+                          @click=${() => this.likeKingdom(id)}
+                        >
+                          +1 Like
+                        </button>
+                        <button
+                          class="button small"
+                          @click=${() => this.unLikeKingdom(id)}
+                        >
+                          -1 Like
+                        </button>
+                      </div>
                       <button
                         class="button small"
-                        @click=${() => this.openSettings(timestamp)}
+                        @click=${() => this.openSettings(id)}
                       >
                         Settings
-                      </button>
-                      <button
-                        class="button small"
-                        @click=${() => this.likeKingdom(timestamp)}
-                      >
-                        +1 Like
-                      </button>
-                      <button
-                        class="button small"
-                        @click=${() => this.unLikeKingdom(timestamp)}
-                      >
-                        -1 Like
                       </button>
                     </div>
                   `
@@ -173,7 +177,7 @@ export class LogList extends OpenElement {
       <div class="kingdom-logs" role="list">
         ${repeat(
           this.kingdoms,
-          (kingdom) => kingdom.timestamp,
+          (kingdom) => kingdom.id,
           this.renderKingdom,
         )}
       </div>

@@ -1,6 +1,7 @@
 import { html } from "lit"
 import { customElement, property } from "lit/decorators.js"
 import { OpenElement } from "../open-element"
+import { v4 as uuid4 } from 'uuid'
 
 @customElement("dominion-logger")
 export class DominionLogger extends OpenElement {
@@ -21,13 +22,13 @@ export class DominionLogger extends OpenElement {
 
   private loadLogs() {
     const playedKingdomsJSON = localStorage.getItem("kingdomLogs")
-    let playedKingdoms: LogData
+    let logData: LogData
 
     if (!playedKingdomsJSON) {
-      playedKingdoms = this.initialiseLog()
+      logData = this.initialiseLog()
     } else {
       try {
-        playedKingdoms = JSON.parse(playedKingdomsJSON)
+        logData = JSON.parse(playedKingdomsJSON)
       } catch (error: any) {
         console.log(
           "Something went wrong parsing the saved JSON",
@@ -37,7 +38,26 @@ export class DominionLogger extends OpenElement {
       }
     }
 
-    this.kingdoms = playedKingdoms.logs.sort(this.reverseSort)
+    /* Migrations */
+    this.migrateData(2, logData, (kingdomLog: Kingdom) => {
+      return ({
+        ...kingdomLog,
+        id: uuid4(),
+        dateCreated: kingdomLog.timestamp,
+        likes: 0,
+      })
+    })
+
+    this.kingdoms = logData.logs.sort(this.reverseSort)
+  }
+  migrateData(version: number, logData: LogData, callback: (log: Kingdom) => Kingdom) {
+    if (logData.version === version - 1) {
+      logData.version = version
+
+      logData.logs = logData.logs.map(callback)
+
+      localStorage.setItem("kingdomLogs", JSON.stringify(logData))
+    }
   }
 
   private reverseSort(a: Kingdom, b: Kingdom) {
@@ -64,10 +84,12 @@ export class DominionLogger extends OpenElement {
       return
     }
 
-    const playedKingdom = {
+    const playedKingdom : Kingdom = {
+      id: uuid4(),
       name: name,
       cards: cards,
       timestamp: Date.now(),
+      dateCreated: Date.now(),
       players: [],
       likes: 0,
     }
@@ -77,17 +99,17 @@ export class DominionLogger extends OpenElement {
     this.saveLogs()
   }
 
-  private getKingdom(timestamp: number) : Kingdom {
+  private getKingdom(id: string) : Kingdom {
     const kingdom = this.kingdoms.find(
-      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
+      (kingdom: Kingdom) => kingdom.id === id,
     )
 
     return kingdom
   }
   private updateKingdom(kingdom: Kingdom) {
-    const { timestamp } = kingdom
+    const { id } = kingdom
     const kingdomPosition = this.kingdoms.findIndex(
-      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
+      (kingdom: Kingdom) => kingdom.id === id,
     )
     /* splice edited kingdom back into place */
     this.kingdoms = [
@@ -100,12 +122,12 @@ export class DominionLogger extends OpenElement {
   }
 
   private editKingdom(event: CustomEvent) {
-    const { name, cards, timestamp } = event.detail
+    const { name, cards, id } = event.detail
     if (!name || !cards) {
       return
     }
 
-    const kingdom = this.getKingdom(timestamp)
+    const kingdom = this.getKingdom(id)
 
     kingdom.name = name
     kingdom.cards = cards
@@ -113,13 +135,13 @@ export class DominionLogger extends OpenElement {
     this.updateKingdom(kingdom)
   }
   private deleteKingdom(event: CustomEvent) {
-    const { timestamp } = event.detail
-    if (!timestamp) {
+    const { id } = event.detail
+    if (!id) {
       return
     }
 
     const kingdomPosition = this.kingdoms.findIndex(
-      (kingdom: Kingdom) => kingdom.timestamp === timestamp,
+      (kingdom: Kingdom) => kingdom.id === id,
     )
 
     this.kingdoms = [
@@ -130,9 +152,9 @@ export class DominionLogger extends OpenElement {
     this.saveLogs()
   }
   likeKingdom(event: CustomEvent) {
-    const { timestamp, likes } = event.detail
+    const { id, likes } = event.detail
 
-    const kingdom = this.getKingdom(timestamp)
+    const kingdom = this.getKingdom(id)
 
     if (typeof kingdom.likes === 'undefined') {
       kingdom.likes = 1
