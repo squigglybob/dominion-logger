@@ -53,7 +53,7 @@ export class DominionLogger extends OpenElement {
   saveLogs() {
     const data = {
       version: 1,
-      logs: this.kingdoms,
+      logs: [ ...this.kingdoms ],
     }
     localStorage.setItem("kingdomLogs", JSON.stringify(data))
   }
@@ -159,7 +159,6 @@ export class DominionLogger extends OpenElement {
           @edit=${this.editKingdom}
           @delete=${this.deleteKingdom}
           @like=${this.likeKingdom}
-          @unlike=${this.unLikeKingdom}
         ></log-list>
       </div>
     `
