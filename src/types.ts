@@ -4,8 +4,28 @@ interface LogData {
 }
 
 interface Kingdom {
+  id: string
   name: string
   cards: string
   timestamp: number
+  dateCreated: number
   likes: number
+  players: Array<Play>
+}
+
+interface Play {
+  playerId: string
+  score: number
+  cards: Array<Card>
+  gameLog: Object
+}
+
+interface Player {
+  id: string
+  name: string
+}
+
+interface Card {
+  name: string
+  token: string
 }
