@@ -106,6 +106,17 @@ hr {
 .kingdom__likes {
   text-align: center;
 }
+.kingdom-search {
+  display: flex;
+  gap: 0.5rem;
+
+  input {
+    flex-grow: 1;
+  }
+  .clear-button {
+    flex-grow: 0;
+  }
+}
 
 @media (prefers-color-scheme: light) {
   :root {

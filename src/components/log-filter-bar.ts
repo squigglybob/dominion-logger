@@ -15,19 +15,33 @@ export class LogFilterBar extends OpenElement {
 
     onChange(event : any) {
         this.search = event.target.value
+        this.runSearch()
+    }
+    runSearch() {
         this.dispatchEvent(new CustomEvent('search', { detail: { search: this.search} }))
+    }
+    clear() {
+        this.search = ''
+        this.runSearch()
     }
 
     render() {
         return html`
             <div class="repel">
                 <span></span>
-                <div>
+                <div class="kingdom-search">
                     <input
                         type="text"
                         placeholder="Search"
                         @input=${this.onChange}
                     >
+                    <button
+                        class="button small"
+                        class="clear-button"
+                        @click=${this.clear}
+                    >
+                        Clear
+                    </button>
                 </div>
             </div>
         `;
