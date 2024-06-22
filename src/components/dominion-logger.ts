@@ -263,20 +263,13 @@ export class DominionLogger extends OpenElement {
       filteredKingdoms = this.kingdoms.filter((kingdom: Kingdom) => {
         let searchTerms = search.split(',')
         searchTerms = searchTerms.map((search) => search.trim())
-        if (this.fieldIncludes(searchTerms, kingdom.name)) {
-          return true
-        }
-        if (this.fieldIncludes(searchTerms, kingdom.cards)) {
-          return true
-        }
-        if (this.fieldIncludes(searchTerms, kingdom.note)) {
+        const searchPool = `${kingdom.name} || ${kingdom.cards} || ${kingdom.note}`
+        if (this.fieldIncludes(searchTerms, searchPool)) {
           return true
         }
         return false
       })
     }
-
-    console.log(filteredKingdoms)
 
     this.filteredKingdoms = filteredKingdoms.sort(this.kingdomSorter)
   }
