@@ -224,13 +224,15 @@ export class DominionLogger extends OpenElement {
     }
     if (search.length > 0) {
       filteredKingdoms = this.kingdoms.filter((kingdom: Kingdom) => {
-        if (kingdom.name.toLowerCase().includes(search)) {
+        let searchTerms = search.split(',')
+        searchTerms = searchTerms.map((search) => search.trim())
+        if (this.fieldIncludes(searchTerms, kingdom.name)) {
           return true
         }
-        if (kingdom.cards.toLowerCase().includes(search)) {
+        if (this.fieldIncludes(searchTerms, kingdom.cards)) {
           return true
         }
-        if (kingdom.note.toLowerCase().includes(search)) {
+        if (this.fieldIncludes(searchTerms, kingdom.note)) {
           return true
         }
         return false
@@ -238,6 +240,11 @@ export class DominionLogger extends OpenElement {
     }
 
     this.filteredKingdoms = filteredKingdoms.sort(this.reverseSort)
+  }
+  fieldIncludes(searchTerms: Array<string>, field: string) {
+    return searchTerms.every((search) => {
+      return field.toLowerCase().includes(search)
+    })
   }
 
   initialiseLog(): LogData {
