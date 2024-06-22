@@ -8,6 +8,9 @@ export class DominionLogger extends OpenElement {
   @property({ attribute: false })
   kingdoms: Array<any>
 
+  @property({ attribute: false })
+  filteredKingdoms: Array<any>
+
   @property({ type: Number, attribute: false })
   logVersion: Number
 
@@ -15,6 +18,7 @@ export class DominionLogger extends OpenElement {
     super()
 
     this.kingdoms = []
+    this.filteredKingdoms = []
     this.logVersion = 1
   }
 
@@ -67,7 +71,8 @@ export class DominionLogger extends OpenElement {
       })
     })
 
-    this.kingdoms = logData.logs.sort(this.reverseSort)
+    this.kingdoms = logData.logs
+    this.filteredKingdoms = logData.logs.sort(this.reverseSort)
   }
   migrateData(version: number, logData: LogData, callback: (log: Kingdom) => Kingdom) {
     if (logData.version === version - 1) {
@@ -198,6 +203,28 @@ export class DominionLogger extends OpenElement {
     this.updateKingdom(kingdom)
   }
 
+  searchKingdoms(event: CustomEvent) {
+    const { search } = event.detail
+
+    if (search.length === 0) {
+      this.filteredKingdoms = this.kingdoms
+    }
+    if (search.length > 0) {
+      this.filteredKingdoms = this.kingdoms.filter((kingdom: Kingdom) => {
+        if (kingdom.name.includes(search)) {
+          return true
+        }
+        if (kingdom.cards.includes(search)) {
+          return true
+        }
+        if (kingdom.note.includes(search)) {
+          return true
+        }
+        return false
+      })
+    }
+  }
+
   initialiseLog(): LogData {
     return {
       version: 1,
@@ -210,8 +237,11 @@ export class DominionLogger extends OpenElement {
       <div class="stack">
         <h1>Dominion Logger</h1>
         <log-form @save=${this.logKingdom}></log-form>
+        <log-filter-bar
+          @search=${this.searchKingdoms}
+        ></log-filter-bar>
         <log-list
-          .kingdoms=${this.kingdoms}
+          .kingdoms=${this.filteredKingdoms}
           @edit=${this.editKingdom}
           @delete=${this.deleteKingdom}
           @like=${this.likeKingdom}
