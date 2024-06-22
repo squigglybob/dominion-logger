@@ -5,12 +5,28 @@ import { OpenElement } from '../open-element';
 @customElement('log-filter-bar')
 export class LogFilterBar extends OpenElement {
 
-    @property({ type: String, attribute: false })
-    search: String
+    @property({ type: String })
+    search: string
+
+    @property({ type: String })
+    sortBy: string
+
+    @property({ type: Boolean })
+    sortReversed: boolean
+
+    sortByOptions: Object
 
     constructor() {
         super()
         this.search = ''
+        this.sortBy = 'date'
+        this.sortReversed = false
+
+        this.sortByOptions = {
+            'date': 'Date',
+            'likes': 'Likes',
+            'bookmarks': 'Bookmarks',
+        }
     }
 
     onChange(event : any) {
@@ -28,11 +44,40 @@ export class LogFilterBar extends OpenElement {
         }
         this.runSearch()
     }
+    onSortByChange(sortBy: string) {
+        if (this.sortBy === sortBy) {
+            this.sortReversed = !this.sortReversed
+        } else {
+            this.sortReversed = false
+        }
+        this.sortBy = sortBy
+        this.dispatchEvent(new CustomEvent('sortby', {
+            detail: {
+                sortBy: this.sortBy,
+                sortReversed: this.sortReversed
+            }
+        }))
+    }
 
     render() {
         return html`
-            <div class="repel">
-                <span></span>
+            <div class="cluster repel">
+                <div class="cluster">
+                    <span>Sort by:</span>
+                    ${
+                        Object.entries(this.sortByOptions).map(([option, label]) => {
+                            return html`
+                                <button
+                                    class="button small ${this.sortBy === option ? 'active' : ''}"
+                                    @click=${() => this.onSortByChange(option)}
+                                >
+                                    ${this.sortBy === option && this.sortReversed ? '-' : ''}${label}
+                                </button>
+                            `
+                        })
+                    }
+
+                </div>
                 <div class="kingdom-search">
                     <input
                         type="text"
