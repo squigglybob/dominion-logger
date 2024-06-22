@@ -22,6 +22,10 @@ export class LogFilterBar extends OpenElement {
     }
     clear() {
         this.search = ''
+        const input: HTMLInputElement | null = document.querySelector('.kingdom-search input')
+        if (input) {
+            input.value = ''
+        }
         this.runSearch()
     }
 
