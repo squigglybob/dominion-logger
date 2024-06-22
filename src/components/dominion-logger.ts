@@ -11,6 +11,9 @@ export class DominionLogger extends OpenElement {
   @property({ attribute: false })
   filteredKingdoms: Array<any>
 
+  @property({ attribute: false })
+  searchTerm: string
+
   @property({ type: Number, attribute: false })
   logVersion: Number
 
@@ -19,6 +22,7 @@ export class DominionLogger extends OpenElement {
 
     this.kingdoms = []
     this.filteredKingdoms = []
+    this.searchTerm = ''
     this.logVersion = 1
   }
 
@@ -100,6 +104,7 @@ export class DominionLogger extends OpenElement {
       version: this.logVersion,
       logs: [ ...this.kingdoms ],
     }
+    this.runFilters()
     localStorage.setItem("kingdomLogs", JSON.stringify(data))
   }
 
@@ -206,23 +211,33 @@ export class DominionLogger extends OpenElement {
   searchKingdoms(event: CustomEvent) {
     const { search } = event.detail
 
+    this.searchTerm = search
+    this.runFilters()
+
+  }
+  runFilters() {
+    const search = this.searchTerm.toLowerCase()
+    let filteredKingdoms = []
+
     if (search.length === 0) {
-      this.filteredKingdoms = this.kingdoms
+      filteredKingdoms = this.kingdoms
     }
     if (search.length > 0) {
-      this.filteredKingdoms = this.kingdoms.filter((kingdom: Kingdom) => {
-        if (kingdom.name.includes(search)) {
+      filteredKingdoms = this.kingdoms.filter((kingdom: Kingdom) => {
+        if (kingdom.name.toLowerCase().includes(search)) {
           return true
         }
-        if (kingdom.cards.includes(search)) {
+        if (kingdom.cards.toLowerCase().includes(search)) {
           return true
         }
-        if (kingdom.note.includes(search)) {
+        if (kingdom.note.toLowerCase().includes(search)) {
           return true
         }
         return false
       })
     }
+
+    this.filteredKingdoms = filteredKingdoms.sort(this.reverseSort)
   }
 
   initialiseLog(): LogData {
