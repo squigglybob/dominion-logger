@@ -8,6 +8,18 @@ export class DominionLogger extends OpenElement {
   @property({ attribute: false })
   kingdoms: Array<any>
 
+  @property({ attribute: false })
+  filteredKingdoms: Array<any>
+
+  @property({ attribute: false })
+  searchTerm: string
+
+  @property({ attribute: false })
+  sortBy: string
+
+  @property({ attribute: false })
+  sortReversed: Boolean
+
   @property({ type: Number, attribute: false })
   logVersion: Number
 
@@ -15,7 +27,13 @@ export class DominionLogger extends OpenElement {
     super()
 
     this.kingdoms = []
+    this.filteredKingdoms = []
+    this.searchTerm = ''
+    this.sortBy = 'date'
+    this.sortReversed = false
     this.logVersion = 1
+
+    this.kingdomSorter = this.kingdomSorter.bind(this)
   }
 
   connectedCallback(): void {
@@ -67,7 +85,8 @@ export class DominionLogger extends OpenElement {
       })
     })
 
-    this.kingdoms = logData.logs.sort(this.reverseSort)
+    this.kingdoms = logData.logs
+    this.filteredKingdoms = logData.logs.sort(this.kingdomSorter)
   }
   migrateData(version: number, logData: LogData, callback: (log: Kingdom) => Kingdom) {
     if (logData.version === version - 1) {
@@ -80,12 +99,31 @@ export class DominionLogger extends OpenElement {
     }
   }
 
-  private reverseSort(a: Kingdom, b: Kingdom) {
-    if (a.timestamp < b.timestamp) {
-      return 1
+  private kingdomSorter(a: Kingdom, b: Kingdom) {
+    let fieldA, fieldB
+    switch (this.sortBy) {
+      case 'date':
+        fieldA = a.timestamp
+        fieldB = b.timestamp
+        break;
+      case 'likes':
+        fieldA = a.likes
+        fieldB = b.likes
+        break;
+      case 'bookmarks':
+        fieldA = a.isBookmarked
+        fieldB = b.isBookmarked
+        break;
+      default:
+        fieldA = a.timestamp
+        fieldB = b.timestamp
+        break;
     }
-    if (a.timestamp > b.timestamp) {
-      return -1
+    if (fieldA < fieldB) {
+      return this.sortReversed ? -1 : 1
+    }
+    if (fieldA > fieldB) {
+      return this.sortReversed ? 1 : -1
     }
     return 0
   }
@@ -95,6 +133,7 @@ export class DominionLogger extends OpenElement {
       version: this.logVersion,
       logs: [ ...this.kingdoms ],
     }
+    this.runFilters()
     localStorage.setItem("kingdomLogs", JSON.stringify(data))
   }
 
@@ -198,6 +237,55 @@ export class DominionLogger extends OpenElement {
     this.updateKingdom(kingdom)
   }
 
+  searchKingdoms(event: CustomEvent) {
+    const { search } = event.detail
+
+    this.searchTerm = search
+    this.runFilters()
+
+  }
+  sortKingdoms(event: CustomEvent) {
+    const { sortBy, sortReversed } = event.detail
+    console.log(sortBy)
+    this.sortBy = sortBy
+    this.sortReversed = sortReversed
+
+    this.runFilters()
+  }
+  runFilters() {
+    const search = this.searchTerm.toLowerCase()
+    let filteredKingdoms = [ ...this.kingdoms ]
+
+    if (search.length === 0) {
+      filteredKingdoms = [ ...this.kingdoms ]
+    }
+    if (search.length > 0) {
+      filteredKingdoms = this.kingdoms.filter((kingdom: Kingdom) => {
+        let searchTerms = search.split(',')
+        searchTerms = searchTerms.map((search) => search.trim())
+        if (this.fieldIncludes(searchTerms, kingdom.name)) {
+          return true
+        }
+        if (this.fieldIncludes(searchTerms, kingdom.cards)) {
+          return true
+        }
+        if (this.fieldIncludes(searchTerms, kingdom.note)) {
+          return true
+        }
+        return false
+      })
+    }
+
+    console.log(filteredKingdoms)
+
+    this.filteredKingdoms = filteredKingdoms.sort(this.kingdomSorter)
+  }
+  fieldIncludes(searchTerms: Array<string>, field: string) {
+    return searchTerms.every((search) => {
+      return field.toLowerCase().includes(search)
+    })
+  }
+
   initialiseLog(): LogData {
     return {
       version: 1,
@@ -209,9 +297,18 @@ export class DominionLogger extends OpenElement {
     return html`
       <div class="stack">
         <h1>Dominion Logger</h1>
-        <log-form @save=${this.logKingdom}></log-form>
+        <log-form
+          @save=${this.logKingdom}
+        ></log-form>
+        <log-filter-bar
+          search=${this.searchTerm}
+          sortBy=${this.sortBy}
+          ?sortReversed=${this.sortReversed}
+          @search=${this.searchKingdoms}
+          @sortby=${this.sortKingdoms}
+        ></log-filter-bar>
         <log-list
-          .kingdoms=${this.kingdoms}
+          .kingdoms=${this.filteredKingdoms}
           @edit=${this.editKingdom}
           @delete=${this.deleteKingdom}
           @like=${this.likeKingdom}
