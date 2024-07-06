@@ -7,7 +7,7 @@ import { DateTime } from "luxon"
 @customElement("log-list")
 export class LogList extends OpenElement {
   @property({ type: Array })
-  kingdoms: Array<any>
+  kingdoms: Array<Kingdom>
 
   @property({ type: String, attribute: false })
   isEditing: string
@@ -67,6 +67,11 @@ export class LogList extends OpenElement {
 
   bookmarkKingdom(id : string) {
     this.dispatchEvent(new CustomEvent("bookmark", { detail: { id, likes: -1 } }))
+  }
+
+  copyKingdom(id: string) {
+    const kingdom = this.kingdoms.find((kingdom) => kingdom.id === id)
+    navigator.clipboard.writeText(kingdom?.cards || '')
   }
 
   private renderKingdom({ name, cards, note, timestamp, isBookmarked, id, likes }: Kingdom) {
@@ -171,6 +176,12 @@ export class LogList extends OpenElement {
                           @click=${() => this.bookmarkKingdom(id)}
                         >
                           Bookmark
+                        </button>
+                        <button
+                          class="button small"
+                          @click=${() => this.copyKingdom(id)}
+                        >
+                          Copy
                         </button>
                       </div>
                       <button
