@@ -74,6 +74,10 @@ export class LogList extends OpenElement {
     navigator.clipboard.writeText(kingdom?.cards || '')
   }
 
+  playAgain(id: string) {
+    this.dispatchEvent(new CustomEvent("play-again", { detail: { id } }))
+  }
+
   private renderKingdom({ name, cards, note, timestamp, isBookmarked, id, likes }: Kingdom) {
     return html`
       <div class="kingdom" role="listitem">
@@ -182,6 +186,12 @@ export class LogList extends OpenElement {
                           @click=${() => this.copyKingdom(id)}
                         >
                           Copy
+                        </button>
+                        <button
+                          class="button small"
+                          @click=${() => this.playAgain(id)}
+                        >
+                          Play again
                         </button>
                       </div>
                       <button
