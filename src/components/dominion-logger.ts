@@ -317,6 +317,7 @@ export class DominionLogger extends OpenElement {
         <log-filter-bar
           search=${this.searchTerm}
           sortBy=${this.sortBy}
+          sortCount=${this.filteredKingdoms.length}
           ?sortReversed=${this.sortReversed}
           @search=${this.searchKingdoms}
           @sortby=${this.sortKingdoms}

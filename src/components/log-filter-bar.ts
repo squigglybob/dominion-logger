@@ -11,6 +11,9 @@ export class LogFilterBar extends OpenElement {
     @property({ type: String })
     sortBy: string
 
+    @property({ type: Number })
+    sortCount: Number
+
     @property({ type: Boolean })
     sortReversed: boolean
 
@@ -21,6 +24,7 @@ export class LogFilterBar extends OpenElement {
         this.search = ''
         this.sortBy = 'date'
         this.sortReversed = false
+        this.sortCount = 0
 
         this.sortByOptions = {
             'date': 'Date',
@@ -79,6 +83,7 @@ export class LogFilterBar extends OpenElement {
 
                 </div>
                 <div class="kingdom-search">
+                    <span>${this.sortCount}</span>
                     <input
                         type="text"
                         placeholder="Search"
