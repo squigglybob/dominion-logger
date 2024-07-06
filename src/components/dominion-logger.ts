@@ -23,6 +23,12 @@ export class DominionLogger extends OpenElement {
   @property({ type: Number, attribute: false })
   logVersion: Number
 
+  @property({ type: String, attribute: false })
+  kingdomName: String
+
+  @property({ type: String, attribute: false })
+  kingdomCards: String
+
   constructor() {
     super()
 
@@ -32,6 +38,9 @@ export class DominionLogger extends OpenElement {
     this.sortBy = 'date'
     this.sortReversed = false
     this.logVersion = 1
+
+    this.kingdomName = ''
+    this.kingdomCards = ''
 
     this.kingdomSorter = this.kingdomSorter.bind(this)
   }
@@ -236,6 +245,16 @@ export class DominionLogger extends OpenElement {
 
     this.updateKingdom(kingdom)
   }
+  playAgain(event: CustomEvent) {
+    const { id } = event.detail
+
+    const kingdom = this.getKingdom(id)
+
+    this.kingdomName = kingdom.name
+    this.kingdomCards = kingdom.cards
+
+    window.scrollTo(0,0)
+  }
 
   searchKingdoms(event: CustomEvent) {
     const { search } = event.detail
@@ -291,11 +310,14 @@ export class DominionLogger extends OpenElement {
       <div class="stack">
         <h1>Dominion Logger</h1>
         <log-form
+          name=${this.kingdomName}
+          cards=${this.kingdomCards}
           @save=${this.logKingdom}
         ></log-form>
         <log-filter-bar
           search=${this.searchTerm}
           sortBy=${this.sortBy}
+          sortCount=${this.filteredKingdoms.length}
           ?sortReversed=${this.sortReversed}
           @search=${this.searchKingdoms}
           @sortby=${this.sortKingdoms}
@@ -306,6 +328,7 @@ export class DominionLogger extends OpenElement {
           @delete=${this.deleteKingdom}
           @like=${this.likeKingdom}
           @bookmark=${this.bookmarkKingdom}
+          @play-again=${this.playAgain}
         ></log-list>
       </div>
     `
